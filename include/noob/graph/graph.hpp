@@ -10,7 +10,7 @@
 #include <noob/fast_hashtable/fast_hashtable.hpp>
 #include <noob/component/component.hpp>
 #include <noob/bitpack/bitpack.hpp>
-//#include <noob/strings/strings.hpp>
+#include <noob/strings/strings.hpp>
 
 #include <rdestl/sort.h>
 
@@ -76,19 +76,24 @@ namespace noob
 			{
 				friend class digraph;
 				public:
-
+/*
 				bool is_valid() const noexcept(true)
 				{
 					return (start_index != std::numeric_limits<uint32_t>::max());
 				}
-
+*/
 				bool has_child() const noexcept(true)
 				{
+					assert(current_index < g.edges.size());
+					
 					return (current_index < end_index);
 				}
 
 				noob::node_handle get_child() noexcept(true)
 				{
+					assert(current_index < g.edges.size());
+					assert(current_index != end_index);
+
 					const noob::node_handle results = g.edges[current_index].get_to();
 					++current_index;
 					return results;
@@ -97,6 +102,11 @@ namespace noob
 				void reset() noexcept(true)
 				{
 					current_index = start_index;
+				}
+
+				uint32_t num_children() const noexcept(true)
+				{
+					return end_index - start_index;
 				}
 
 				protected:
@@ -115,12 +125,15 @@ namespace noob
 
 			uint32_t num_children(const noob::node_handle n) const noexcept(true)
 			{
-				return nodes[n.index()];
+				return nodes[n.index()].get_num_children();
 			}
 
 			noob::node_handle add_node() noexcept(true)
 			{
-				nodes.push_back(0);
+				noob::digraph::node n;
+				n.set_first_edge(std::numeric_limits<uint32_t>::max());
+				n.set_num_children(0);
+				nodes.push_back(n);
 				return noob::node_handle::make(nodes.size() - 1);
 			}
 
@@ -139,12 +152,17 @@ namespace noob
 			{
 				if (!edge_exists(first, second))
 				{
-					noob::digraph::edge e;		
+					noob::digraph::edge e;
+
 					e.set_from(first);
 					e.set_to(second);
 					edges.push_back(e);
 
-					nodes[first.index()] += 1;
+					noob::digraph::node n = nodes[first.index()];
+					
+					const uint32_t num = n.get_num_children() + 1;
+					n.set_num_children(num);
+					nodes[first.index()] = n;
 
 					auto search = edge_table.insert(noob::pack_32_to_64(first.index(), second.index()));
 					search->value = std::numeric_limits<uint64_t>::max();
@@ -166,13 +184,63 @@ namespace noob
 			void sort() noexcept(true)
 			{
 				rde::quick_sort(edges.begin(), edges.end(), rde::less<noob::digraph::edge>());
+				
+				//TODO: Fix algorithm
+				uint32_t edges_till_current = 0;
+				const uint32_t num_nodes = nodes.size();
+				for (uint32_t i = 0; i < num_nodes; ++i)
+				{
+					noob::digraph::node n = nodes[i];
+					n.set_first_edge(edges_till_current);
+					edges_till_current += n.get_num_children();
+
+					nodes[i] = n;
+				}
+/*
+				uint32_t current_node, node_child_count;
+				current_node = node_child_count = 0;
+				
+				noob::digraph::node n;
+				n.set_first_edge(0);
+				n.set_num_children(0);
+
+				for (uint32_t edge_counter = 0; edge_counter < edges.size(); ++edge_counter)
+				{
+					const noob::digraph::edge e = edges[edge_counter];
+					
+					// The begin position stored in the node cannot be bigger than our current position on the edgelist.
+					assert(!(n.get_first_edge() > edge_counter));
+					
+					if (n.get_first_edge() == e.get_from().index())
+					{
+						++node_child_count;
+					}
+					// Once we hit a new node;
+					else 
+					{
+						n.set_num_children(node_child_count);
+						
+						node_child_count = 0;
+						
+						nodes[current_node] = n;
+						
+						++current_node;
+						
+						n = nodes[current_node];
+						n.set_first_edge(edge_counter);
+						n.set_num_children(0);
+					}
+
+				}
+*/
 				ready = true;
 			}
 
 			noob::digraph::visitor get_visitor(const noob::node_handle n) const noexcept(true)
 			{
-				const uint32_t num_children = nodes[n.index()];
-				const uint32_t first_edge = get_first_edge_index(n);
+				const uint32_t first_edge = nodes[n.index()].get_first_edge();
+				const uint32_t num_children = nodes[n.index()].get_num_children();
+				// const uint32_t first_edge = get_first_edge_index(n);
 				return noob::digraph::visitor(*this, first_edge, first_edge + num_children);
 			}
 
@@ -209,10 +277,44 @@ namespace noob
 			}
 
 
+			class node
+			{
+				public:
+					void set_first_edge(uint32_t arg) noexcept(true)
+					{
+						const std::tuple<uint32_t, uint32_t> unpacked = noob::pack_64_to_32(val);
+						val = noob::pack_32_to_64(arg, std::get<1>(unpacked));
+					}
+
+
+					void set_num_children(uint32_t arg) noexcept(true)
+					{
+						const std::tuple<uint32_t, uint32_t> unpacked = noob::pack_64_to_32(val);
+						val = noob::pack_32_to_64(std::get<0>(unpacked), arg);
+					}
+
+
+					uint32_t get_first_edge() const noexcept(true)
+					{
+						return std::get<0>(noob::pack_64_to_32(val));
+					}
+
+
+					uint32_t get_num_children() const noexcept(true)
+					{
+						return std::get<1>(noob::pack_64_to_32(val));
+					}
+	
+
+
+				protected:
+					uint64_t val;
+			};
+
 			noob::fast_hashtable edge_table;
 
 			rde::vector<noob::digraph::edge> edges;
-			rde::vector<uint32_t> nodes;
+			rde::vector<noob::digraph::node> nodes;
 
 			bool ready;
 	};
