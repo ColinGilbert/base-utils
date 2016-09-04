@@ -5,6 +5,7 @@
 #include <limits>
 
 #include <rdestl/vector.h>
+#include <noob/strings/strings.hpp>
 
 namespace noob
 {
@@ -54,6 +55,7 @@ namespace noob
 					handle h;
 					h.inner = std::numeric_limits<uint32_t>::max();
 				}
+
 
 			protected:
 

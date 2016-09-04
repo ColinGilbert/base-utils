@@ -1,7 +1,11 @@
+#pragma once
+
 #include <algorithm>
 #include <string>
 #include <cstring>
 #include "modp_numtoa.h"
+
+
 namespace noob
 {
 	// TODO: Verify correctness of the trimming routines, and find which trim direction is best/fastest for our number-to-string funcs.

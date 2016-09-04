@@ -10,6 +10,7 @@
 #include <noob/fast_hashtable/fast_hashtable.hpp>
 #include <noob/component/component.hpp>
 #include <noob/bitpack/bitpack.hpp>
+//#include <noob/strings/strings.hpp>
 
 #include <rdestl/sort.h>
 
@@ -21,7 +22,7 @@ namespace noob
 	{
 		public:
 
-			digraph() noexcept(true) : n_nodes(0), ready(false) {}
+			digraph() noexcept(true) : ready(false) {}
 
 			// Backed by uint64_t bitmask: First 32 bits = from, second 32 bits = to.
 			class edge
@@ -64,6 +65,11 @@ namespace noob
 				uint64_t val;
 			};
 
+			static std::string to_string(const noob::digraph::edge e)
+			{
+				return noob::concat(noob::to_string(e.get_from().index()), "-", noob::to_string(e.get_to().index()));
+			}
+
 			// Does not affect the digraph - only reads from it. Therefore if you have a constant digraph, you can iterate over it from anywhere using these. :)
 			// However, you MUST call is_valid prior to using it, and then has_child() prior to get_child(). Failure to do so will cause either garbage reads or segfaults.
 			class visitor
@@ -104,19 +110,18 @@ namespace noob
 
 			uint32_t num_nodes() const noexcept(true)
 			{
-				return n_nodes;
+				return nodes.size();
 			}
 
 			uint32_t num_children(const noob::node_handle n) const noexcept(true)
 			{
-				return n_children[n.index()];
+				return nodes[n.index()];
 			}
 
 			noob::node_handle add_node() noexcept(true)
 			{
-				++n_nodes;
-				n_children.push_back(0);
-				return noob::node_handle::make(n_nodes - 1);
+				nodes.push_back(0);
+				return noob::node_handle::make(nodes.size() - 1);
 			}
 
 			// Grr, searching the hashtable mutates it! No const for you!
@@ -139,7 +144,7 @@ namespace noob
 					e.set_to(second);
 					edges.push_back(e);
 
-					n_children[first.index()] += 1;
+					nodes[first.index()] += 1;
 
 					auto search = edge_table.insert(noob::pack_32_to_64(first.index(), second.index()));
 					search->value = std::numeric_limits<uint64_t>::max();
@@ -150,7 +155,7 @@ namespace noob
 
 			bool node_valid(const noob::node_handle n) const noexcept(true)
 			{
-				return !(n.index() > n_nodes);
+				return !(n.index() > nodes.size());
 			}
 
 			bool is_ready() const noexcept(true)
@@ -166,7 +171,7 @@ namespace noob
 
 			noob::digraph::visitor get_visitor(const noob::node_handle n) const noexcept(true)
 			{
-				const uint32_t num_children = n_children[n.index()];
+				const uint32_t num_children = nodes[n.index()];
 				const uint32_t first_edge = get_first_edge_index(n);
 				return noob::digraph::visitor(*this, first_edge, first_edge + num_children);
 			}
@@ -175,8 +180,19 @@ namespace noob
 			{
 				edge_table.clear();
 				edges.clear();
-				n_children.clear();
-				n_nodes = 0;
+				nodes.clear();
+			}
+
+			std::string to_string() const noexcept(true)
+			{
+				std::string results = noob::concat("Num nodes = ", noob::to_string(nodes.size()), ", num edges = ", noob::to_string(edges.size()), ". Edges: ");
+				
+				for (noob::digraph::edge e : edges)
+				{	
+					results = noob::concat(results, "", noob::to_string(e.get_from().index()), "-", noob::to_string(e.get_to().index()), ", ");
+				}
+
+				return results.substr(0, results.size() - 2);
 			}
 
 
@@ -193,12 +209,10 @@ namespace noob
 			}
 
 
-
 			noob::fast_hashtable edge_table;
 
 			rde::vector<noob::digraph::edge> edges;
-			rde::vector<uint32_t> n_children;
-			uint32_t n_nodes;
+			rde::vector<uint32_t> nodes;
 
 			bool ready;
 	};

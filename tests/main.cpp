@@ -25,6 +25,8 @@ namespace noob
 
 int main()
 {
+	// Basic tests.
+	
 	noob::logger::log(noob::log_importance::INFO, noob::concat("Testing logger! ", noob::to_string(0.9998)));
 	
 	noob::digraph g;
@@ -34,11 +36,10 @@ int main()
 	const noob::node_handle a = g.add_node();
 	const noob::node_handle b = g.add_node();
 	const noob::node_handle c = g.add_node();
-	
 
 	assert(g.num_nodes() == 3);
 
-
+	// Test in-order insertions
 	g.add_edge(a, b);
 
 	assert(g.edge_exists(a, b) == true);
@@ -68,6 +69,9 @@ int main()
 	}
 
 	assert(pre_sort.size() == 2);
+	
+	// Test sorting the edges and ensure results stay the same.
+	
 	g.sort();
 
 	rde::vector<noob::node_handle> post_sort;
@@ -86,7 +90,10 @@ int main()
 		assert(pre_sort[i] == post_sort[i]);
 	}
 
-	
+	// TODO: Test with deliberately out-of-order edge insertions.
+
+
+	noob::logger::log(noob::log_importance::INFO, g.to_string());
 
 	noob::logger::log(noob::log_importance::INFO, "All pass! :)");
 	
