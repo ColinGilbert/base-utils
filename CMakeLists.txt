@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 project(noob-tests)
 
-#set(CMAKE_BUILD_TYPE "DEBUG")
-set(CMAKE_CXX_FLAGS "-std=c++11 -fno-rtti -fno-exceptions ${CMAKE_CXX_FLAGS}")
+set(CMAKE_BUILD_TYPE "DEBUG")
+set(CMAKE_CXX_FLAGS "-std=c++11  ${CMAKE_CXX_FLAGS}")
 
 include_directories(rde)
 list (APPEND rdestl_src

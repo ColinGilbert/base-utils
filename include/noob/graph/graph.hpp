@@ -1,4 +1,3 @@
-// Near minimal as naive_graphs get.
 #pragma once
 
 #include <cstdint>
@@ -8,6 +7,7 @@
 #include <algorithm>
 #include <vector>
 
+#include <noob/fast_hashtable/fast_hashtable.hpp>
 #include <noob/component/component.hpp>
 #include <noob/bitpack/bitpack.hpp>
 
@@ -17,73 +17,189 @@ namespace noob
 {
 	typedef noob::handle<uint32_t> node_handle;
 
-	class graph
+	class digraph
 	{
 		public:
-			// Does not affect the graph - only reads from it. Therefore if you have a constant graph, you can iterate over it from anywhere.
-			// However, you MUST use has_next() - which is extremely cheap - prior to calling get_next() or else you'll either get garbage or a segfault.
-			class visitor
+
+			digraph() noexcept(true) : n_nodes(0), ready(false) {}
+
+			// Backed by uint64_t bitmask: First 32 bits = from, second 32 bits = to.
+			class edge
 			{
-				friend class graph;
+				friend class digraph;
+
 				public:
 
-				bool has_next() const noexcept(true)
+				edge() noexcept(true) : val(0) {}
+
+				void set_from(const noob::node_handle from) noexcept(true)
 				{
+					std::tuple<uint32_t, uint32_t> unpacked = noob::pack_64_to_32(val);
+					val = pack_32_to_64(from.index(), std::get<1>(unpacked));
 				}
 
-				noob::node_handle get_next() noexcept(true)
+				void set_to(const noob::node_handle to) noexcept(true)
 				{
+					std::tuple<uint32_t, uint32_t> unpacked = noob::pack_64_to_32(val);
+					val = pack_32_to_64(std::get<0>(unpacked), to.index());
+				}
+
+				noob::node_handle get_from() const noexcept(true)
+				{
+					return noob::node_handle::make(std::get<0>(noob::pack_64_to_32(val)));
+				}
+
+				noob::node_handle get_to() const noexcept(true)
+				{
+					return noob::node_handle::make(std::get<1>(noob::pack_64_to_32(val)));
+				}
+
+				bool operator<(const noob::digraph::edge rhs) const noexcept(true)
+				{
+					return val < rhs.val;
+				}
+
+
+				protected:
+				uint64_t val;
+			};
+
+			// Does not affect the digraph - only reads from it. Therefore if you have a constant digraph, you can iterate over it from anywhere using these. :)
+			// However, you MUST call is_valid prior to using it, and then has_child() prior to get_child(). Failure to do so will cause either garbage reads or segfaults.
+			class visitor
+			{
+				friend class digraph;
+				public:
+
+				bool is_valid() const noexcept(true)
+				{
+					return (start_index != std::numeric_limits<uint32_t>::max());
+				}
+
+				bool has_child() const noexcept(true)
+				{
+					return (current_index < end_index);
+				}
+
+				noob::node_handle get_child() noexcept(true)
+				{
+					const noob::node_handle results = g.edges[current_index].get_to();
+					++current_index;
+					return results;
 				}
 
 				void reset() noexcept(true)
 				{
+					current_index = start_index;
 				}
 
 				protected:
+				visitor(const noob::digraph& graph_arg, uint32_t start_arg, uint32_t end_arg) noexcept(true) : g(graph_arg), start_index(start_arg), end_index(end_arg), current_index(start_arg)  {}
+				const noob::digraph& g;
+				const uint32_t start_index, end_index;
+				uint32_t current_index;
 			};
 
 			friend class visitor;
 
-
 			uint32_t num_nodes() const noexcept(true)
 			{
+				return n_nodes;
+			}
+
+			uint32_t num_children(const noob::node_handle n) const noexcept(true)
+			{
+				return n_children[n.index()];
 			}
 
 			noob::node_handle add_node() noexcept(true)
 			{
+				++n_nodes;
+				n_children.push_back(0);
+				return noob::node_handle::make(n_nodes - 1);
 			}
 
-			void add_child(const noob::node_handle first, const noob::node_handle second) noexcept(true)
+			// Grr, searching the hashtable mutates it! No const for you!
+			bool edge_exists(const noob::node_handle first, const noob::node_handle second) noexcept(true)
 			{
+				auto search = edge_table.lookup(noob::pack_32_to_64(first.index(), second.index()));
+				if (edge_table.is_valid(search))
+				{
+					return (search->value > 0);
+				}
+				return false;
+			}
+
+			void add_edge(const noob::node_handle first, const noob::node_handle second) noexcept(true)
+			{
+				if (!edge_exists(first, second))
+				{
+					noob::digraph::edge e;		
+					e.set_from(first);
+					e.set_to(second);
+					edges.push_back(e);
+
+					n_children[first.index()] += 1;
+
+					auto search = edge_table.insert(noob::pack_32_to_64(first.index(), second.index()));
+					search->value = std::numeric_limits<uint64_t>::max();
+
+					ready = false;
+				}
 			}
 
 			bool node_valid(const noob::node_handle n) const noexcept(true)
 			{
+				return !(n.index() > n_nodes);
 			}
 
-			bool graph_valid() const noexcept(true)
+			bool is_ready() const noexcept(true)
 			{
+				return ready;
 			}
 
-			noob::graph::visitor get_visitor(const noob::node_handle n) const noexcept(true)
+			void sort() noexcept(true)
 			{
+				rde::quick_sort(edges.begin(), edges.end(), rde::less<noob::digraph::edge>());
+				ready = true;
+			}
+
+			noob::digraph::visitor get_visitor(const noob::node_handle n) const noexcept(true)
+			{
+				const uint32_t num_children = n_children[n.index()];
+				const uint32_t first_edge = get_first_edge_index(n);
+				return noob::digraph::visitor(*this, first_edge, first_edge + num_children);
 			}
 
 			void clear() noexcept(true)
 			{
+				edge_table.clear();
+				edges.clear();
+				n_children.clear();
+				n_nodes = 0;
 			}
 
-			void empty() noexcept(true)
-			{
-			}
-
-			void reserve(uint32_t num) noexcept(true)
-			{
-			}
 
 		protected:
-			static constexpr uint32_t invalid_32 = std::numeric_limits<uint32_t>::max();
-			static constexpr uint64_t invalid_64 = std::numeric_limits<uint64_t>::max();
 
+			uint32_t get_first_edge_index(const noob::node_handle n) const noexcept(true)
+			{
+				noob::digraph::edge e;
+				e.set_from(n);
+				e.set_to(noob::node_handle::make(0));
+				auto search = rde::lower_bound(edges.begin(), edges.end(), e , rde::less<noob::digraph::edge>());
+
+				return (search - edges.begin());
+			}
+
+
+
+			noob::fast_hashtable edge_table;
+
+			rde::vector<noob::digraph::edge> edges;
+			rde::vector<uint32_t> n_children;
+			uint32_t n_nodes;
+
+			bool ready;
 	};
 }
