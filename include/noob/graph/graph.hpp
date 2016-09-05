@@ -23,7 +23,7 @@ namespace noob
 	{
 		public:
 
-			digraph() noexcept(true) : edges(8192), nodes(8291), ready(false) {}
+			digraph() noexcept(true) : ready(false) {}
 
 			// Backed by uint64_t bitmask: First 32 bits = from, second 32 bits = to.
 			class edge
@@ -264,6 +264,15 @@ namespace noob
 				return results.substr(0, results.size() - 2);
 			}
 
+			void reserve_nodes(uint32_t arg) noexcept(true)
+			{
+				nodes.reserve(arg);
+			}
+			
+			void reserve_edges(uint32_t arg) noexcept(true)
+			{
+				edges.reserve(arg);
+			}
 
 		protected:
 
