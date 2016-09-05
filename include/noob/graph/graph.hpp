@@ -23,7 +23,7 @@ namespace noob
 	{
 		public:
 
-			digraph() noexcept(true) : ready(false) {}
+			digraph() noexcept(true) : edges(8192), nodes(8291), ready(false) {}
 
 			// Backed by uint64_t bitmask: First 32 bits = from, second 32 bits = to.
 			class edge
