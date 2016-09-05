@@ -11,6 +11,7 @@
 #include <noob/component/component.hpp>
 #include <noob/bitpack/bitpack.hpp>
 #include <noob/strings/strings.hpp>
+#include <iostream>
 
 #include <rdestl/sort.h>
 
@@ -84,14 +85,14 @@ namespace noob
 */
 				bool has_child() const noexcept(true)
 				{
-					assert(current_index < g.edges.size());
+					// assert(current_index < g.edges.size());
 					
 					return (current_index < end_index);
 				}
 
 				noob::node_handle get_child() noexcept(true)
 				{
-					assert(current_index < g.edges.size());
+					// assert(current_index < g.edges.size());
 					assert(current_index != end_index);
 
 					const noob::node_handle results = g.edges[current_index].get_to();
