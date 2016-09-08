@@ -33,41 +33,41 @@ namespace noob
 
 	static std::string to_string(int32_t i)
 	{
-		std::string s(16, ' ');
+		std::string s(16, '0');
 		modp_itoa10(i, &s[0]);
 		return trim(s);		
 	}
 
 	static std::string to_string(uint32_t i)
 	{
-		std::string s(16, ' ');
+		std::string s(16, '0');
 		modp_uitoa10(i, &s[0]);
 		return trim(s);
 	}
 
 	static std::string to_string(int64_t i)
 	{
-		std::string s(24, ' ');
+		std::string s(24, '0');
 		modp_litoa10(i, &s[0]);
 		return trim(s);
 	}
 
 	static std::string to_string(uint64_t i)
 	{
-		std::string s(24, ' ');
+		std::string s(24, '0');
 		modp_ulitoa10(i, &s[0]);
 		return trim(s);
 	}
 
 	static std::string to_string(double f, uint32_t precision)
 	{
-		std::string s(32, ' ');
+		std::string s(32, '0');
 		modp_dtoa2(f, &s[0], precision);
 		return trim(s);
 	}
 	static std::string to_string(double f)
 	{
-		std::string s(32, ' ');
+		std::string s(32, '0');
 		uint32_t precision = 5;
 		modp_dtoa2(f, &s[0], precision);
 		return trim(s);
