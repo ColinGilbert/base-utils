@@ -62,6 +62,23 @@ namespace noob
 		//return trim(s);
 	}
 
+	static std::string to_string(int i)
+	{
+		std::string s(24, ' ');
+		size_t num = modp_ulitoa10(i, &s[0]);
+		return s.substr(0, num);
+		//return trim(s);
+	}
+
+		static std::string to_string(long int i)
+	{
+		std::string s(24, ' ');
+		size_t num = modp_ulitoa10(i, &s[0]);
+		return s.substr(0, num);
+		//return trim(s);
+	}
+
+
 	static std::string to_string(double f, uint32_t precision)
 	{
 		std::string s(32, ' ');
