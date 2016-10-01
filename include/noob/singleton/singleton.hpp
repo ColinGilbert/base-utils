@@ -2,7 +2,7 @@
 
 namespace noob
 {
-	template<class T>
+	template<typename T>
 		class singleton
 		{
 			public:
