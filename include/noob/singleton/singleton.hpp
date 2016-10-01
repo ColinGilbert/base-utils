@@ -6,9 +6,8 @@ namespace noob
 	class singleton
 	{
 		public:
-			singleton(T arg) noexcept(true) : t(arg) {}
-			T& get() const noexcept(true) { return t; }
+			static T& get() noexcept(true) { return t; }
 		private:
-			T t;
+			static T t;
 	};
 }
