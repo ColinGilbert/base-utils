@@ -6,7 +6,7 @@ namespace noob
 		class singleton
 		{
 			public:
-				static T& get() noexcept(true)
+				T& get() noexcept(true)
 				{
 					static T t;
 					return t;
