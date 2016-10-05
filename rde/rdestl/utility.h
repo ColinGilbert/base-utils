@@ -142,7 +142,7 @@ namespace internal
 	template<typename T>
 	void construct_n(T* to, size_t count, int_to_type<false>)
 	{
-		sizeof(to);
+		// sizeof(to);
 		for (size_t i = 0; i < count; ++i)
 			new (to + i) T();
 	}
@@ -167,7 +167,9 @@ namespace internal
 			}
 		}
 #else
-		sizeof(first); sizeof(last); sizeof(pred);
+		// sizeof(first);
+		// sizeof(last);
+		// sizeof(pred);
 #endif
 	}
 
