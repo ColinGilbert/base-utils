@@ -21,7 +21,8 @@ namespace noob
 		uint32_t y = static_cast<uint32_t>(arg);
 		return std::make_tuple(x,y);
 	}
-
+	
+	// http://stackoverflow.com/questions/1322510/given-an-integer-how-do-i-find-the-next-largest-power-of-two-using-bit-twiddlin
 	static uint32_t next_power_of_two(uint32_t arg) noexcept(true)
 	{
 		uint32_t n = arg;
