@@ -32,5 +32,7 @@ namespace noob
 		n |= n >> 8;
 		n |= n >> 16;
 		n++;
+
 		return n;
 	}
+}
