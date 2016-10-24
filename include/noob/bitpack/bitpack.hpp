@@ -5,9 +5,10 @@
 
 namespace noob
 {
-	static uint32_t pack_8_to_32(uint8_t a, uint8_t b, uint8_t c, uint8_t d)
-	{
-	}
+	// TODO:
+	// static uint32_t pack_8_to_32(uint8_t a, uint8_t b, uint8_t c, uint8_t d)
+	// {
+	// }
 
 	static uint64_t pack_32_to_64(uint32_t x, uint32_t y) noexcept(true)
 	{
