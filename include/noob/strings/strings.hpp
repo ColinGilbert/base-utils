@@ -4,13 +4,30 @@
 #include <string>
 #include <cstring>
 #include <stdlib.h>
-
+#include <cctype>
 
 #include "modp_numtoa.h"
 
 
 namespace noob
 {
+
+	// <cctype>'s iscntrl only works for the current locale. This is to ensure evaluation of proper ASCII.
+	template <typename T>
+	static bool is_ascii_control_char(T Arg)
+	{
+		return Arg < 32 || Arg == 127; 
+	}
+
+	static bool contains_ascii_control_chars(const std::string& Arg)
+	{
+		for (auto c : Arg)
+		{
+			if (is_ascii_control_char(c) return true;
+		}
+		return false;
+	}
+
 	// TODO: Verify correctness of the trimming routines, and find which trim direction is best/fastest for our number-to-string funcs.
 
 	// NOTE: Trimming routines from: http://stackoverflow.com/questions/216823/whats-the-best-way-to-trim-stdstring/217605#217605
@@ -72,6 +89,7 @@ namespace noob
 		return s.substr(0, num);
 		//return trim(s);
 	}
+
 	static std::string to_string(double f)
 	{
 		std::string s(32, ' ');
@@ -186,7 +204,7 @@ namespace noob
 	 */
 
 
-	static unsigned char *utf8_check(unsigned char *s)
+	static unsigned char *utf8_check_kuhn(unsigned char *s)
 	{
 		while (*s) {
 			if (*s < 0x80)
@@ -229,7 +247,6 @@ namespace noob
 
 
 
-	// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 	// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 	// See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
 	//
@@ -278,7 +295,7 @@ namespace noob
 		12,36,12,12,12,12,12,12,12,12,12,12
 	};
 
-	static uint32_t utf8_decode(uint32_t* _state, uint32_t* _codep, uint8_t _ch)
+	static uint32_t utf8_decode_hoehrmann(uint32_t* _state, uint32_t* _codep, uint8_t _ch)
 	{
 		uint32_t byte = _ch;
 		uint32_t type = s_utf8d[byte];
@@ -290,5 +307,5 @@ namespace noob
 		*_state = s_utf8d[256 + *_state + type];
 		return *_state;
 	}
-	//
+	
 }
