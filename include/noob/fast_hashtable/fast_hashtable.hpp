@@ -85,9 +85,10 @@ namespace noob
 			~fast_hashtable();
 
 			// Basic operations
-			cell* lookup(size_t key);
+			const cell* lookup(size_t key);
+			const cell* const lookup(size_t key) const;			
 			cell* insert(size_t key);
-			bool is_valid(const cell*);
+			bool is_valid(const cell*) const;
 			void del(cell* cell);
 			void del(size_t key);
 			void clear();
