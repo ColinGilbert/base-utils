@@ -66,7 +66,7 @@ noob::fast_hashtable::cell* noob::fast_hashtable::lookup(size_t key)
 //----------------------------------------------
 //  noob::fast_hashtable::lookup
 //----------------------------------------------
-const noob::fast_hashtable::cell* const noob::fast_hashtable::lookup(size_t key) const
+const noob::fast_hashtable::cell* const noob::fast_hashtable::lookup_immutable(size_t key) const
 {
 	if (key)
 	{
