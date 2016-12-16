@@ -14,10 +14,10 @@ namespace noob
 
 	// <cctype>'s iscntrl only works for the current locale. This is to ensure evaluation of proper ASCII.
 	template <typename T>
-	static bool is_ascii_control_char(T Arg)
-	{
-		return Arg < 32 || Arg == 127; 
-	}
+		static bool is_ascii_control_char(T Arg)
+		{
+			return Arg < 32 || Arg == 127; 
+		}
 
 	static bool contains_ascii_control_chars(const std::string& Arg)
 	{
@@ -183,7 +183,7 @@ namespace noob
 		}
 
 	// NOTE: utf8_check() made by Markus Kuhn <http://www.cl.cam.ac.uk/~mgk25/> -- 2005-03-30. Info below:
-
+	// TODO: Convert to std::string
 	/*
 	 * The utf8_check() function scans the '\0'-terminated string starting
 	 * at s. It returns a pointer to the first byte of the first malformed
@@ -307,5 +307,21 @@ namespace noob
 		*_state = s_utf8d[256 + *_state + type];
 		return *_state;
 	}
-	
+
+	static bool is_valid_utf8(const std::string& Buffer)
+	{
+		if (contains_ascii_control_chars(Buffer)) return false;
+
+		if (utf8_check_kuhn(Buffer.c_str()) != NULL) return false;
+
+		uint32_t code_point;
+		uint32_t state = 0;
+		for (auto c : Buffer)
+		{
+			utf8_decode_hoehrmann(&state, &code_point, c);
+			if (state != UTF8_ACCEPT) return false;
+		}
+
+		return true;
+	}
 }
