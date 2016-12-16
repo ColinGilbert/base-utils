@@ -121,7 +121,7 @@ noob::fast_hashtable::cell* noob::fast_hashtable::insert(size_t key)
 }
 
 
-bool noob::fast_hashtable::is_valid(const cell* c const) const
+bool noob::fast_hashtable::is_valid(const cell* const c) const
 {
 	if (c != nullptr)
 	{
