@@ -204,8 +204,9 @@ namespace noob
 	 */
 
 
-	static unsigned char* utf8_check_kuhn(unsigned char* s)
+	static unsigned char* utf8_check_kuhn(const unsigned char* Arg)
 	{
+		unsigned char* s = const_cast<unsigned char*>(Arg);
 		while (*s) {
 			if (*s < 0x80)
 				/* 0xxxxxxx */
