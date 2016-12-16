@@ -41,24 +41,8 @@ noob::fast_hashtable::~fast_hashtable()
 //----------------------------------------------
 noob::fast_hashtable::cell* noob::fast_hashtable::lookup(size_t key) 
 {
-	if (key)
-	{
-		// Check regular cells
-		for (cell* cell = FIRST_CELL(integer_hash(key));; cell = CIRCULAR_NEXT(cell))
-		{
-			if (cell->key == key)
-				return cell;
-			if (!cell->key)
-				return NULL;
-		}
-	}
-	else
-	{
-		// Check zero cell
-		if (zero_used)
-			return &cell_zero;
-		return NULL;
-	}
+
+	return const_cast<noob::fast_hashtable::cell*>(lookup_immutable(key));
 };
 
 
