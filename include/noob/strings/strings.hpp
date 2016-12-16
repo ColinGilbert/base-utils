@@ -204,7 +204,7 @@ namespace noob
 	 */
 
 
-	static unsigned char *utf8_check_kuhn(unsigned char *s)
+	static unsigned char* utf8_check_kuhn(unsigned char* s)
 	{
 		while (*s) {
 			if (*s < 0x80)
@@ -295,7 +295,7 @@ namespace noob
 		12,36,12,12,12,12,12,12,12,12,12,12
 	};
 
-	static uint32_t utf8_decode_hoehrmann(uint32_t* _state, uint32_t* _codep, uint8_t _ch)
+	static uint32_t utf8_decode_hoehrmann(uint32_t* _state, uint32_t* _codep, unsigned char _ch)
 	{
 		uint32_t byte = _ch;
 		uint32_t type = s_utf8d[byte];
@@ -312,7 +312,7 @@ namespace noob
 	{
 		if (contains_ascii_control_chars(Buffer)) return false;
 
-		if (utf8_check_kuhn(Buffer.c_str()) != NULL) return false;
+		if (utf8_check_kuhn(reinterpret_cast<const uint8_t*>(Buffer.c_str())) != NULL) return false;
 
 		uint32_t code_point;
 		uint32_t state = 0;
