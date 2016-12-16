@@ -23,7 +23,7 @@ namespace noob
 	{
 		for (auto c : Arg)
 		{
-			if (is_ascii_control_char(c) return true;
+			if (is_ascii_control_char(c)) return true;
 		}
 		return false;
 	}
