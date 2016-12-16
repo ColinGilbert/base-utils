@@ -60,7 +60,7 @@ const noob::fast_hashtable::cell* const noob::fast_hashtable::lookup_immutable(s
 			if (cell->key == key)
 				return cell;
 			if (!cell->key)
-				return NULL;
+				return nullptr;
 		}
 	}
 	else
@@ -68,7 +68,7 @@ const noob::fast_hashtable::cell* const noob::fast_hashtable::lookup_immutable(s
 		// Check zero cell
 		if (zero_used)
 			return &cell_zero;
-		return NULL;
+		return nullptr;
 	}
 };
 
@@ -121,9 +121,9 @@ noob::fast_hashtable::cell* noob::fast_hashtable::insert(size_t key)
 }
 
 
-bool noob::fast_hashtable::is_valid(const cell* c) const
+bool noob::fast_hashtable::is_valid(const cell* c const) const
 {
-	if (c != NULL)
+	if (c != nullptr)
 	{
 		return true;
 	}
@@ -281,5 +281,5 @@ noob::fast_hashtable::cell* noob::fast_hashtable::iterator::next()
 	}
 
 	// Finished
-	return current = NULL;
+	return current = nullptr;
 }

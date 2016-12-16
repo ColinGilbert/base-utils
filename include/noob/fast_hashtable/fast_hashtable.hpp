@@ -1,3 +1,5 @@
+// Based on Preshing's public-domain implementation
+
 #pragma once
 
 #include <stdint.h>
@@ -88,7 +90,7 @@ namespace noob
 			cell* lookup(size_t key);
 			const cell* const lookup_immutable(size_t key) const;			
 			cell* insert(size_t key);
-			bool is_valid(const cell*) const;
+			bool is_valid(const cell* const) const;
 			void del(cell* cell);
 			void del(size_t key);
 			void clear();
