@@ -4,7 +4,6 @@
 #include <vector>
 #include <limits>
 
-#include <stdstl/vector.h>
 #include <noob/strings/strings.hpp>
 
 namespace noob
