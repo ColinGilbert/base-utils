@@ -3,7 +3,7 @@
 #include <memory>
 #include <vector>
 #include <limits>
-#include <assert>
+#include <cassert>
 
 #include <noob/strings/strings.hpp>
 
